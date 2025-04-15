@@ -1,0 +1,1 @@
+/jet/home/hsun3/hsun3//LAGRANTO_model_Simons//goodies/timeres.sh

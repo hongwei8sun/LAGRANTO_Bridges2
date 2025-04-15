@@ -1,0 +1,27 @@
+
+
+#module load gcc/10.2.0
+#module load openmpi/3.1.6-gcc10.2.0
+# module load parallel-netcdf/1.12.1
+#module load hdf5/1.10.7-gcc10.2.0
+
+# module load gcc/13.2.1-p20240113
+# module load openmpi/5.0.3-gcc13.2.1
+# module load hdf5/1.10.7-gcc10.2.0
+# module load parallel-netcdf/1.12.1
+
+module load allocations intel/20.4 hdf5/1.12.0-intel20.4 openmpi/4.0.2-intel20.4
+
+export NETCDF=/ocean/projects/ees210020p/shared/netcdf
+export LD_LIBRARY_PATH=/ocean/projects/ees210020p/shared/netcdf/lib:$LD_LIBRARY_PATH
+export INC_LIBRARY_PATH=/ocean/projects/ees210020p/shared/netcdf/include:$LD_LIBRARY_PATH
+
+export LAGRANTO=/jet/home/hsun3/hsun3/LAGRANTO_model_Simons
+export DYN_TOOLS=/jet/home/hsun3/hsun3
+
+FCFLAGS="-I/ocean/projects/ees210020p/shared/netcdf/include"
+LDFLAGS="-L/ocean/projects/ees210020p/shared/netcdf/lib -lnetcdff"
+
+export PATH=${LAGRANTO}/bin:${NETCDF}/bin:$PATH
+
+
