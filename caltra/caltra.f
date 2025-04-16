@@ -916,7 +916,7 @@ c          Trajectory has already left data domain (mark as <mdv>)
 
 C         Save positions only every deltout minutes
 
-!!! shw
+!!! shw: help to change the output frequency
         IF(real(deltout)<=real(timeinc)*60.0)THEN
 
           delta =
@@ -1128,7 +1128,7 @@ c        Get the new velocity in between
 !------------------------------------------------------------------
 ! add settling speed to the injected parcel !!! shw
 !------------------------------------------------------------------
-         Is_settling = 1
+         Is_settling = 0 ! 1: add settling; other number (0): turn off
 
          IF(Is_settling==1)THEN
 

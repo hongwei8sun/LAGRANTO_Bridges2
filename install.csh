@@ -195,23 +195,34 @@ foreach prog ( $core )
 end
 \rm -f trace/calvar.o select/special.o
 
+echo 'finish trace/ and select/'
+
 foreach tool ( $tools )
   \rm -f goodies/${tool} goodies/${tool}.o 
 end
 \rm -f goodies/*.mod goodies/*.o
 
+echo 'finish tool, goodies'
+
 \rm lib/*.a lib/*.o
+
+echo 'finish lib'
 
 foreach prog ( $core )
    \rm -f bin/${prog} bin/${prog}.sh  bin/${prog}.era5
 end
 \rm -f bin/seltra bin/seltra.sh bin/seltra.era5
+
+echo 'finish bin/'
+
 foreach tool ( $tools )
   \rm -f bin/${tool} bin/${tool}.sh bin/${tool}.era5
 end
 \rm -f bin/lagrantohelp.sh bin/lagrantohelp.era5
 \rm -f bin/startf bin/startf.sh bin/startf.era5
 \rm -f bin/lagranto.sh bin/lagranto.era5
+
+echo 'finish bin/ again'
 
 \rm ${LAGRANTO}/startf
 
