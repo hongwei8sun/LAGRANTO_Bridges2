@@ -1230,7 +1230,7 @@ c        Get the new velocity in between
 C        Calculate new positions
          x1 = x0 + fbflag*u*deltat/(deltay*cos(y0*pi/180.))
          y1 = y0 + fbflag*v*deltat/deltay
-         p1 = p0 + fbflag*wfactor*w*deltat/100 + D_Eta_Pa_sum ! shw
+         p1 = p0 + fbflag*wfactor*w*deltat/100 + D_Eta_Pa_sum/100 ! shw
 
 c       Handle pole problems (crossing and near pole trajectory)
         if ((hem.eq.1).and.(y1.gt.90.)) then
