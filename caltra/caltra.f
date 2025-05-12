@@ -112,7 +112,7 @@ c     Grid description
       real                                   mdv             ! Missing data value
 
 c     Auxiliary variables                 
-      real                                   delta,rd(1),rd1 !!! shw: change rd to rd(1)
+      real                                   delta,rd0,rd1 !!! shw:change rd to rd0
       integer	                             itm,iloop,i,j,k,filo,lalo
       integer                                ierr,stat
       integer                                cdfid,fid
@@ -288,7 +288,7 @@ c     The negative <-fid> of the file identifier is used as a flag for parameter
       tload    = -tst
       call input_open (fid,filename)
       call input_grid (-fid,varname,xmin,xmax,ymin,ymax,dx,dy,nx,ny,
-     >                 tload,pollon,pollat,rd,rd,nz,rd,rd,rd1,timecheck)
+     >          tload,pollon,pollat,rd0,rd0,nz,rd0,rd0,rd1,timecheck)
       call input_close(fid)
 
 C     Check if the number of levels is too large
@@ -1033,7 +1033,7 @@ c     Declaration of subroutine parameters
       integer      left
       real	   x0,y0,p0
       real         reltpos0,reltpos1
-      real   	   deltat
+      real   	   deltat ! [s] shw: computational time step, from [ts]
       integer      numit
       integer      jump
       real         wfactor
@@ -1052,10 +1052,25 @@ c     Declaration of subroutine parameters
 c     For settling speed !!! shw
       integer      Is_settling
       real         temp0(nx*ny*nz),temp1(nx*ny*nz) !!! shw
-      real         vis, fpair, g, Rd
+      real         vis, fpair
       real         T_K0, T_K1, T_K, P_hPa
       real         aden_col, aer_ar_wet
       real         w_settle, vt
+      real      g
+      parameter (g=9.8) ! [m/s2]
+      real      Rd
+      parameter (Rd=287.0) ! [J/(kg K)]
+      !!! shw
+
+c     For adding tubulence diffusivity !!! shw
+      integer      Add_Dv, it
+      real         Dt_R ! time step for the diffusion process
+      real         rand_uniform, Xx, Random, w_pertub
+      real         D_Eta_m, D_Eta_Pa, D_Eta_Pa_sum
+      real      Dv
+      parameter (Dv = 0.02) ! vertical diffusivity [m2/s]
+      integer   Nt_R
+      parameter (Nt_R = 50) ! how many times smaller of Dt_R than ts
       !!! shw
 
 
@@ -1148,8 +1163,6 @@ c        Get the new velocity in between
 	  ! 5.0e-6cm   = 0.05 um
           aer_ar_wet = 2.0e-5
 
-          g = 9.8 ! [m/s2]
-
           ! Calculate fall speed vt in cm/s
           vt =2.0/9.0*aden_col*(aer_ar_wet**2.0)*(g*100.0)/vis
           vt =vt *
@@ -1161,7 +1174,6 @@ c        Get the new velocity in between
           vt = vt*0.01
 
           ! [m/s] => [Pa/s]
-          Rd = 287.0 ! [J/(kg K)]
           w_settle = vt *(P_hPa*100)*g /(Rd*T_K)
 
           ! w_settle is alway >0, going downward
@@ -1169,11 +1181,56 @@ c        Get the new velocity in between
 
          ENDIF
 
+!!! shw
+!------------------------------------------------------------------
+! add white noise to the vertical velocity
+! the white noise is a function of vertical diffusivity (Dv)
+! Based on Lagras et al., (2005). DOI:10.5194/ACP-5-1605-2005
+! (1) define the vertical diffusion coeffecient: 
+!     parameter    (Dv = 0.02) ! vertical diffusivity [m2/s]
+! (2) define a random variable Random, with a uniformly distributed over
+! the interval [-3,3] with zero mean and unit variance.
+! (3) define a 50 times smaller time step (than advection time step):
+!     Nt_R = 50
+!     Dt_R = deltat/Nt_R
+! (4) define random process: 
+!     D_Eta = Random * sqrt(2.0*Dv*R_dt)
+! (5) Add D_Eta to advection by faking a vertical velocity pertubation:
+!     w_pertub = D_Eta/time step
+!     w = w + w_pertub
+!------------------------------------------------------------------
+         Add_Dv = 1 ! 1: add Dv; other number (0): turn off
+
+         ! (3)
+         Dt_R = deltat/Nt_R ! [s]
+
+         IF(Add_Dv == 1)THEN
+         do it=1,Nt_R,1
+
+          ! (2)
+          ! Generate a random number in [0,1)
+          call random_number(rand_uniform)
+          ! Scale to [-3,3]
+          Xx = -3.0 + 6.0 * rand_uniform
+          ! Normalize to have unit variance
+          Random = Xx / sqrt(3.0) 
+
+          ! (4) D_Eta in [m]
+          D_Eta_m = Random * sqrt(2.0*Dv*Dt_R)
+
+          ! (5) Change D_Eta's unit: [m] => [Pa]
+          D_Eta_Pa = -1 * D_Eta_m *(P_hPa*100)*g /(Rd*T_K)
+
+          D_Eta_Pa_sum = D_Eta_Pa_sum + D_Eta_Pa
+         enddo
+         ENDIF 
+!!! shw
+
 
 C        Calculate new positions
          x1 = x0 + fbflag*u*deltat/(deltay*cos(y0*pi/180.))
          y1 = y0 + fbflag*v*deltat/deltay
-         p1 = p0 + fbflag*wfactor*w*deltat/100.
+         p1 = p0 + fbflag*wfactor*w*deltat/100 + D_Eta_Pa_sum ! shw
 
 c       Handle pole problems (crossing and near pole trajectory)
         if ((hem.eq.1).and.(y1.gt.90.)) then

@@ -1,1 +1,1 @@
-/jet/home/hsun3/hsun3//LAGRANTO_model_Simons//select/select.sh
+/jet/home/hsun3/hsun3/LAGRANTO//LAGRANTO_model_Simons//select/select.sh

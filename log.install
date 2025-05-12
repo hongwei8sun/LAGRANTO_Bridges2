@@ -1,0 +1,89 @@
+ 
+╭────────────────────────── ⭐ ees210020p: Advancing understanding of aerosol-cloud interactions through large eddy simulations (PI: Peter Blossey) [Default] ──────────────────────────╮
+│                                                                                                                                                                                       │
+│   Resource                                                                                                                                          Balance   End Date     User       │
+│  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  │
+│   💻 Bridges 2 Regular Memory     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸   809,999 / 810,000 SU   2026-03-31   ✅ hsun3   │
+│   💾 /ocean/projects/ees210020p   ━━━━━━━━━━━━━━━━━╸                                                                                      5,431 / 30,000 GB   2026-03-31   ✅ hsun3   │
+│                                                                                                                                                                                       │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+-----------------------------------------------------------------
+Installing libraries
+-----------------------------------------------------------------
+
+
+ ioinp_cdo.f -> ioinp.f
+
+ifort -c -O iotra.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating iotra.a
+ifort -c -O ioinp.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating ioinp.a
+ifort -c -O inter.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating inter.a
+ifort -c -O times.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating times.a
+ifort -c -O libcdfio.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating libcdfio.a
+ifort -c -O libcdfplus.f
+ifort: command line warning #10006: ignoring unknown option '-fallow-argument-mismatch'
+ar: creating libcdfplus.a
+
+-----------------------------------------------------------------
+Check that all libraries are available
+-----------------------------------------------------------------
+
+-rw-r--r-- 1 hsun3 ees210020p 80076 Apr 28 13:35 iotra.a
+-rw-r--r-- 1 hsun3 ees210020p 74232 Apr 28 13:35 ioinp.a
+-rw-r--r-- 1 hsun3 ees210020p 14850 Apr 28 13:35 inter.a
+-rw-r--r-- 1 hsun3 ees210020p 7126 Apr 28 13:35 times.a
+-rw-r--r-- 1 hsun3 ees210020p 63634 Apr 28 13:35 libcdfio.a
+-rw-r--r-- 1 hsun3 ees210020p 60306 Apr 28 13:35 libcdfplus.a
+
+-----------------------------------------------------------------
+Installing Lagranto core programs
+-----------------------------------------------------------------
+
+----- caltra
+
+ifort -c -O -I/ocean/projects/ees210020p/shared/netcdf/include caltra.f
+caltra.f(125): error #6414: This PARAMETER constant name is invalid in this context.   [RD]
+      real                                   delta,rd(1),rd1 !!! shw: change rd to rd(1)
+---------------------------------------------------^
+caltra.f(1066): error #6404: This name does not have a type, and must have an explicit type.   [G]
+      parameter    (g=9.8) ! [m/s2]
+--------------------^
+caltra.f(1067): error #6404: This name does not have a type, and must have an explicit type.   [RD]
+      parameter    (Rd=287.0) ! [J/(kg K)]
+--------------------^
+caltra.f(1075): error #6404: This name does not have a type, and must have an explicit type.   [DV]
+      parameter    (Dv = 0.02) ! vertical diffusivity [m2/s]
+--------------------^
+caltra.f(1076): error #6404: This name does not have a type, and must have an explicit type.   [NT_R]
+      parameter    (Nt_R = 50) ! how many times smaller of Dt_R than ts
+--------------------^
+caltra.f(1217): error #6404: This name does not have a type, and must have an explicit type.   [RAND_UNIFORM]
+          call random_number(rand_uniform)
+-----------------------------^
+caltra.f(1217): error #6362: The data types of the argument(s) are invalid.   [RANDOM_NUMBER]
+          call random_number(rand_uniform)
+-----------------------------^
+caltra.f(1219): error #6404: This name does not have a type, and must have an explicit type.   [X]
+          x = -3.0 + 6.0 * rand_uniform
+----------^
+caltra.f(1221): error #6404: This name does not have a type, and must have an explicit type.   [RANDOM]
+          Random = x / sqrt(3.0) 
+----------^
+caltra.f(1224): error #6404: This name does not have a type, and must have an explicit type.   [D_ETA]
+          D_Eta = Random * sqrt(2.0*Dv*Dt_R)
+----------^
+compilation aborted for caltra.f (code 1)
+make: [caltra.make:8: caltra.o] Error 1 (ignored)
+ifort -o caltra caltra.o /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/times.a /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/iotra.a /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/ioinp.a /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/inter.a /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/libcdfio.a /jet/home/hsun3/hsun3//LAGRANTO_model_Simons//lib/libcdfplus.a -I/ocean/projects/ees210020p/shared/netcdf/include -L/ocean/projects/ees210020p/shared/netcdf/lib -lnetcdff -lnetcdf
+ifort: error #10236: File not found:  'caltra.o'
+make: [caltra.make:11: caltra] Error 1 (ignored)
+Problem in compiling caltra ... Stop
